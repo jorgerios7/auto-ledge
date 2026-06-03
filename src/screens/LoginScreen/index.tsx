@@ -32,10 +32,10 @@ export default function LoginScreen() {
     try {
       if (isSignUp) {
         await register(name, email, password);
-        ToastService.showSuccess('Conta Criada', 'Seja bem-vindo ao AutoLedge!');
+        ToastService.showSuccess('Conta Criada', 'Seja bem-vindo ao Auto Ledge!');
       } else {
         await login(email, password);
-        ToastService.showSuccess('Login Realizado', 'Bem-vindo de volta ao AutoLedge!');
+        ToastService.showSuccess('Login Realizado', 'Bem-vindo de volta ao Auto Ledge!');
       }
     } catch (err: any) {
       const errMsg = err.message || 'Ocorreu um erro. Tente novamente.';
@@ -68,7 +68,7 @@ export default function LoginScreen() {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
         <View style={styles.headerContainer}>
-          <Image source={require('../../../assets/icon.png')} style={styles.logoImage} />
+          <Image source={require('../../../assets/adaptive-icon.png')} style={styles.logoImage} />
         </View>
 
         <LoginForm

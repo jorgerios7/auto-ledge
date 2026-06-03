@@ -13,6 +13,7 @@ import { TeslaButton } from '../../../components/TeslaButton';
 import { Alert } from '../../../types';
 import { colors } from '../../../theme/colors';
 import { ToastService } from '../../../utils/toast';
+import { formatDateToDDMMYYYY } from '../../../utils/date';
 import { styles } from '../styles';
 import Header from '../../../components/Header';
 
@@ -169,7 +170,7 @@ export function AlertList({ onAddPress }: AlertListProps) {
                       ) : (
                         <View style={styles.triggerRow}>
                           <Text style={styles.triggerLabel}>DATA ALVO:</Text>
-                          <Text style={styles.triggerValue}>{alert.targetDate}</Text>
+                          <Text style={styles.triggerValue}>{formatDateToDDMMYYYY(alert.targetDate)}</Text>
                         </View>
                       )}
                     </View>

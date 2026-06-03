@@ -14,6 +14,7 @@ import { colors } from '../../../theme/colors';
 import { ToastService } from '../../../utils/toast';
 import { styles } from '../styles';
 import Header from '../../../components/Header';
+import { formatDateToDDMMYYYY } from '../../../utils/date';
 
 interface FuelListProps {
   onAddPress: () => void;
@@ -81,7 +82,7 @@ export function FuelList({ onAddPress }: FuelListProps) {
                 <TeslaCard
                   key={log.id}
                   title={`${log.liters.toLocaleString('pt-BR')} ${unitLabel}`}
-                  subtitle={log.date}
+                  subtitle={formatDateToDDMMYYYY(log.date)}
                   headerRight={
                     <View style={styles.cardHeaderRight}>
                       <Text style={styles.totalCostText}>R$ {log.totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</Text>

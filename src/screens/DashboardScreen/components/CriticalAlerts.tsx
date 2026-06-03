@@ -4,6 +4,7 @@ import { AlertTriangle } from 'lucide-react-native';
 import { Alert } from '../../../types';
 import { colors } from '../../../theme/colors';
 import { styles } from '../styles';
+import { formatDateToDDMMYYYY } from '../../../utils/date';
 
 interface CriticalAlertsProps {
   criticalAlerts: Alert[];
@@ -21,7 +22,7 @@ export default function CriticalAlerts({ criticalAlerts, onPress }: CriticalAler
       </View>
       {criticalAlerts.slice(0, 2).map((a, i) => (
         <Text key={i} style={styles.alertBannerText}>
-          • {a.title} ({a.type === 'odometer' ? `${a.targetOdometer?.toLocaleString('pt-BR')} km` : a.targetDate})
+          • {a.title} ({a.type === 'odometer' ? `${a.targetOdometer?.toLocaleString('pt-BR')} km` : formatDateToDDMMYYYY(a.targetDate)})
         </Text>
       ))}
     </TouchableOpacity>

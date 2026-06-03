@@ -13,6 +13,7 @@
     "@react-native-google-signin/google-signin": "^16.1.2",
     "expo": "~54.0.34",
     "expo-image-picker": "~17.0.11",
+    "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
     "firebase": "^12.14.0",
     "lucide-react-native": "^1.17.0",
@@ -22,6 +23,7 @@
     "react-native-toast-message": "^2.3.3"
   },
   "devDependencies": {
+    "@tsconfig/node18": "^18.2.6",
     "@types/react": "~19.1.0",
     "typescript": "~5.9.2"
   },

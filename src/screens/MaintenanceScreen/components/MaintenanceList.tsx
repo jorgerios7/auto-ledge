@@ -17,6 +17,7 @@ import { colors } from '../../../theme/colors';
 import { ToastService } from '../../../utils/toast';
 import { styles } from '../styles';
 import Header from '../../../components/Header';
+import { formatDateToDDMMYYYY } from '../../../utils/date';
 
 interface MaintenanceListProps {
   onAddPress: () => void;
@@ -128,7 +129,7 @@ export function MaintenanceList({ onAddPress, onEditPress }: MaintenanceListProp
                 <TeslaCard
                   key={m.id}
                   title={m.description}
-                  subtitle={m.date}
+                  subtitle={formatDateToDDMMYYYY(m.date)}
                   headerRight={
                     <View style={styles.cardHeaderRight}>
                       <View style={[

@@ -17,6 +17,7 @@ import { colors } from '../../../theme/colors';
 import { ToastService } from '../../../utils/toast';
 import { styles } from '../styles';
 import { CustomModal } from '../../../components/CustomModal';
+import { formatDateToDDMMYYYY, formatDateToYYYYMMDD } from '../../../utils/date';
 
 interface MaintenanceModalProps {
   visible: boolean;
@@ -25,19 +26,30 @@ interface MaintenanceModalProps {
 }
 
 export function MaintenanceModal({ visible, editingMaint, onClose }: MaintenanceModalProps) {
+  if (!visible) return null;
+
   const { selectedVehicle, saveMaintenance } = useApp();
 
-  // Form State
-  const [type, setType] = useState<MaintenanceType>(editingMaint?.type || 'preventive');
-  const [description, setDescription] = useState(editingMaint?.description || '');
-  const [partsCost, setPartsCost] = useState(editingMaint ? editingMaint.partsCost.toString() : '');
-  const [laborCost, setLaborCost] = useState(editingMaint ? editingMaint.laborCost.toString() : '');
-  const [date, setDate] = useState(editingMaint?.date || new Date().toISOString().split('T')[0]);
-  const [partsDetail, setPartsDetail] = useState(editingMaint?.partsDetail || '');
-  const [attachmentUri, setAttachmentUri] = useState<string | undefined>(editingMaint?.attachmentUri);
-  const [odometer, setOdometer] = useState(editingMaint?.odometer ? editingMaint.odometer.toString() : '');
+  const editingTtype = editingMaint?.type;
+  const editingDescription = editingMaint?.description;
+  const editingPartsCost = editingMaint?.partsCost;
+  const editingLaborCost = editingMaint?.laborCost;
+  const editingDate = editingMaint?.date;
+  const editingPartsDetail = editingMaint?.partsDetail;
+  const editingAttachmentUri = editingMaint?.attachmentUri;
+  const editingOdometer = editingMaint?.odometer;
 
-  const [error, setError] = useState('');
+  const [dataState, setDataState] = useState({
+    type: editingTtype ? editingTtype : 'preventive' as MaintenanceType,
+    description: editingDescription ? editingDescription : '',
+    partsCost: editingPartsCost ? editingPartsCost.toString() : '',
+    laborCost: editingLaborCost ? editingLaborCost.toString() : '',
+    date: editingDate ? formatDateToDDMMYYYY(editingDate) : formatDateToDDMMYYYY(new Date().toISOString().split('T')[0]),
+    partsDetail: editingPartsDetail ? editingPartsDetail : '',
+    attachmentUri: editingAttachmentUri ? editingAttachmentUri : undefined,
+    odometer: editingOdometer ? editingOdometer.toString() : '',
+  });
+
   const [loading, setLoading] = useState(false);
 
   const pickImage = async () => {
@@ -56,7 +68,7 @@ export function MaintenanceModal({ visible, editingMaint, onClose }: Maintenance
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        setAttachmentUri(result.assets[0].uri);
+        setDataState(prev => ({ ...prev, attachmentUri: result.assets[0].uri }));
       }
     } catch (err) {
       console.error('Error picking image:', err);
@@ -64,35 +76,44 @@ export function MaintenanceModal({ visible, editingMaint, onClose }: Maintenance
   };
 
   const handleSave = async () => {
-    if (!description || !partsCost || !laborCost || !date) {
-      const msg = 'Por favor, preencha todos os campos obrigatórios (Descrição, Custos e Data).';
-      setError(msg);
+    if (!dataState.description || !dataState.partsCost || !dataState.laborCost || !dataState.date || !dataState.odometer) {
       ToastService.showError('Campos Obrigatórios', 'Preencha a descrição, os custos e a data do serviço.');
       return;
     }
-    setError('');
+
     setLoading(true);
     try {
       await saveMaintenance({
         id: editingMaint ? editingMaint.id : undefined,
-        type,
-        description,
-        partsCost: parseFloat(partsCost) || 0,
-        laborCost: parseFloat(laborCost) || 0,
-        date,
-        partsDetail: partsDetail || undefined,
-        attachmentUri,
-        odometer: odometer ? parseInt(odometer, 10) : undefined,
+        type: dataState.type,
+        description: dataState.description,
+        partsCost: parseFloat(dataState.partsCost) || 0,
+        laborCost: parseFloat(dataState.laborCost) || 0,
+        date: formatDateToYYYYMMDD(dataState.date),
+        partsDetail: dataState.partsDetail || undefined,
+        attachmentUri: dataState.attachmentUri,
+        odometer: dataState.odometer ? parseInt(dataState.odometer, 10) : undefined,
         timestamps: editingMaint ? editingMaint.timestamps : undefined,
       });
       ToastService.showSuccess(
         editingMaint ? 'Manutenção Atualizada' : 'Manutenção Registrada',
-        editingMaint ? `O serviço "${description}" foi atualizado com sucesso!` : `O serviço "${description}" foi adicionado com sucesso!`
+        editingMaint ? `O serviço "${dataState.description}" foi atualizado com sucesso!` : `O serviço "${dataState.description}" foi adicionado com sucesso!`
       );
+
+      setDataState({
+        type: 'preventive',
+        description: '',
+        partsCost: '',
+        laborCost: '',
+        date: formatDateToDDMMYYYY(new Date().toISOString().split('T')[0]),
+        partsDetail: '',
+        attachmentUri: undefined,
+        odometer: '',
+      });
+
       onClose();
     } catch (err: any) {
       const errMsg = err.message || 'Erro ao registrar manutenção.';
-      setError(errMsg);
       ToastService.showError(editingMaint ? 'Erro ao Atualizar' : 'Erro ao Registrar', errMsg);
     } finally {
       setLoading(false);
@@ -102,23 +123,22 @@ export function MaintenanceModal({ visible, editingMaint, onClose }: Maintenance
   return (
     <CustomModal visible={visible} onClose={onClose} loading={loading} headerTitle={editingMaint ? 'Editar Manutenção' : 'Nova Manutenção'}>
       <ScrollView contentContainerStyle={styles.formScroll} keyboardShouldPersistTaps="handled">
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         <Text style={styles.fieldLabel}>Tipo de Manutenção</Text>
         <View style={styles.typeSelectorGrid}>
           <TouchableOpacity
-            style={[styles.typeBtn, type === 'preventive' && styles.typeBtnActive]}
-            onPress={() => setType('preventive')}
+            style={[styles.typeBtn, dataState.type === 'preventive' && styles.typeBtnActive]}
+            onPress={() => setDataState(prev => ({ ...prev, type: 'preventive' }))}
           >
-            <Text style={[styles.typeBtnText, type === 'preventive' && styles.typeBtnTextActive]}>
+            <Text style={[styles.typeBtnText, dataState.type === 'preventive' && styles.typeBtnTextActive]}>
               Preventiva
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.typeBtn, type === 'corrective' && styles.typeBtnActive]}
-            onPress={() => setType('corrective')}
+            style={[styles.typeBtn, dataState.type === 'corrective' && styles.typeBtnActive]}
+            onPress={() => setDataState(prev => ({ ...prev, type: 'corrective' }))}
           >
-            <Text style={[styles.typeBtnText, type === 'corrective' && styles.typeBtnTextActive]}>
+            <Text style={[styles.typeBtnText, dataState.type === 'corrective' && styles.typeBtnTextActive]}>
               Corretiva
             </Text>
           </TouchableOpacity>
@@ -127,24 +147,24 @@ export function MaintenanceModal({ visible, editingMaint, onClose }: Maintenance
         <TeslaInput
           label="Descrição do Serviço *"
           placeholder="Ex: Troca de pastilhas de freio, Alinhamento"
-          value={description}
-          onChangeText={setDescription}
+          value={dataState.description}
+          onChangeText={(text) => setDataState(prev => ({ ...prev, description: text }))}
         />
 
         <View style={styles.rowInputs}>
           <TeslaInput
             label="Custo Peças (R$) *"
             placeholder="0.00"
-            value={partsCost}
-            onChangeText={setPartsCost}
+            value={dataState.partsCost}
+            onChangeText={(text) => setDataState(prev => ({ ...prev, partsCost: text }))}
             keyboardType="numeric"
             containerStyle={{ width: '48%' }}
           />
           <TeslaInput
             label="Mão de Obra (R$) *"
             placeholder="0.00"
-            value={laborCost}
-            onChangeText={setLaborCost}
+            value={dataState.laborCost}
+            onChangeText={(text) => setDataState(prev => ({ ...prev, laborCost: text }))}
             keyboardType="numeric"
             containerStyle={{ width: '48%' }}
           />
@@ -153,23 +173,24 @@ export function MaintenanceModal({ visible, editingMaint, onClose }: Maintenance
         <TeslaInput
           label="Quilometragem no Serviço (KM)"
           placeholder={`Opcional (Atual: ${selectedVehicle?.currentOdometer.toLocaleString('pt-BR')} KM)`}
-          value={odometer}
-          onChangeText={setOdometer}
+          value={dataState.odometer}
+          onChangeText={(text) => setDataState(prev => ({ ...prev, odometer: text }))}
           keyboardType="numeric"
         />
 
         <TeslaInput
           label="Data *"
-          placeholder="AAAA-MM-DD"
-          value={date}
-          onChangeText={setDate}
+          placeholder="DD/MM/AAAA"
+          value={dataState.date}
+          onChangeText={(text) => setDataState(prev => ({ ...prev, date: text }))}
+          isDate
         />
 
         <TeslaInput
           label="Peças Substituídas / Detalhes"
           placeholder="Ex: Pastilhas cerâmica Bosch, Filtro HEPA"
-          value={partsDetail}
-          onChangeText={setPartsDetail}
+          value={dataState.partsDetail}
+          onChangeText={(text) => setDataState(prev => ({ ...prev, partsDetail: text }))}
           multiline
           numberOfLines={3}
           containerStyle={{ height: 80 }}
@@ -177,10 +198,10 @@ export function MaintenanceModal({ visible, editingMaint, onClose }: Maintenance
 
         <Text style={styles.fieldLabel}>Anexo (Nota Fiscal / Recibo)</Text>
 
-        {attachmentUri ? (
+        {dataState.attachmentUri ? (
           <View style={styles.imagePreviewContainer}>
-            <Image source={{ uri: attachmentUri }} style={styles.imagePreview} />
-            <TouchableOpacity onPress={() => setAttachmentUri(undefined)} style={styles.removeImageBtn}>
+            <Image source={{ uri: dataState.attachmentUri }} style={styles.imagePreview} />
+            <TouchableOpacity onPress={() => setDataState(prev => ({ ...prev, attachmentUri: undefined }))} style={styles.removeImageBtn}>
               <Text style={styles.removeImageText}>Remover Anexo</Text>
             </TouchableOpacity>
           </View>

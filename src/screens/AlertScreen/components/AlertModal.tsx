@@ -11,6 +11,7 @@ import { TeslaInput } from '../../../components/TeslaInput';
 import { TeslaButton } from '../../../components/TeslaButton';
 import { AlertType } from '../../../types';
 import { ToastService } from '../../../utils/toast';
+import { formatDateToYYYYMMDD } from '../../../utils/date';
 import { styles } from '../styles';
 import { CustomModal } from '../../../components/CustomModal';
 
@@ -44,7 +45,7 @@ export function AlertModal({ visible, onClose }: AlertFormProps) {
       return;
     }
 
-    if (type === 'date' && new Date(targetDate) < new Date()) {
+    if (type === 'date' && new Date(formatDateToYYYYMMDD(targetDate)) < new Date()) {
       ToastService.showError('Erro', 'A data alvo deve ser maior que a data atual.');
       return;
     }
@@ -54,7 +55,7 @@ export function AlertModal({ visible, onClose }: AlertFormProps) {
       await saveAlert({
         type,
         title,
-        targetDate: type === 'date' ? targetDate : undefined,
+        targetDate: type === 'date' ? formatDateToYYYYMMDD(targetDate) : undefined,
         targetOdometer: type === 'odometer' ? parseInt(targetOdometer, 10) : undefined,
         maintenanceId: linkedMaintenanceId || undefined,
       });
@@ -116,9 +117,10 @@ export function AlertModal({ visible, onClose }: AlertFormProps) {
         ) : (
           <TeslaInput
             label="Data Alvo *"
-            placeholder="AAAA-MM-DD"
+            placeholder="DD/MM/AAAA"
             value={targetDate}
             onChangeText={setTargetDate}
+            isDate
           />
         )}
 

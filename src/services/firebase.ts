@@ -6,7 +6,7 @@ import { initializeFirestore, Firestore } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // REPLACE THESE CONFIG DETAILS WITH YOUR FIREBASE PROJECT CONFIG
-// To configure, set your credentials here. If left empty, AutoLedge will run in local-only demo mode.
+// To configure, set your credentials here. If left empty, Auto Ledge will run in local-only demo mode.
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -40,7 +40,7 @@ if (firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.apiKey !
     console.error('Failed to initialize Firebase:', error);
   }
 } else {
-  console.log('Firebase configuration not found. AutoLedge running in offline/demo mode with Local Storage.');
+  console.log('Firebase configuration not found. Auto Ledge running in offline/demo mode with Local Storage.');
 }
 
 // REPLACE THIS WITH YOUR WEB CLIENT ID FROM FIREBASE/GOOGLE CLOUD CONSOLE

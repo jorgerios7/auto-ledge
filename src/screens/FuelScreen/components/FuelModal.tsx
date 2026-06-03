@@ -9,6 +9,7 @@ import { TeslaButton } from '../../../components/TeslaButton';
 import { ToastService } from '../../../utils/toast';
 import { styles } from '../styles';
 import { CustomModal } from '../../../components/CustomModal';
+import { formatDateToDDMMYYYY, formatDateToYYYYMMDD } from '../../../utils/date';
 
 interface FuelModalProps {
   visible: boolean;
@@ -21,7 +22,7 @@ export function FuelModal({ visible, onClose }: FuelModalProps) {
   // Form State
   const [liters, setLiters] = useState('');
   const [totalCost, setTotalCost] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(formatDateToDDMMYYYY(new Date().toISOString().split('T')[0]));
   const [odometer, setOdometer] = useState('');
 
   const [error, setError] = useState('');
@@ -53,7 +54,7 @@ export function FuelModal({ visible, onClose }: FuelModalProps) {
       await saveFuelLog({
         liters: parseFloat(liters) || 0,
         totalCost: parseFloat(totalCost) || 0,
-        date,
+        date: formatDateToYYYYMMDD(date),
         odometer: odoValue || 0,
       });
       ToastService.showSuccess(`${recordLabel} Registrado`, 'O registro foi adicionado com sucesso!');
@@ -61,7 +62,7 @@ export function FuelModal({ visible, onClose }: FuelModalProps) {
       // Reset Form
       setLiters('');
       setTotalCost('');
-      setDate(new Date().toISOString().split('T')[0]);
+      setDate(formatDateToDDMMYYYY(new Date().toISOString().split('T')[0]));
       setOdometer('');
       onClose();
     } catch (err: any) {
@@ -105,9 +106,10 @@ export function FuelModal({ visible, onClose }: FuelModalProps) {
 
         <TeslaInput
           label="Data *"
-          placeholder="AAAA-MM-DD"
+          placeholder="DD/MM/AAAA"
           value={date}
           onChangeText={setDate}
+          isDate
         />
 
         <TeslaButton
