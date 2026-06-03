@@ -7,7 +7,6 @@ import {
 } from 'react-native';
 import { useApp } from '../../context/AppContext';
 import { TeslaCard } from '../../components/TeslaCard';
-import { TeslaChart } from '../../components/TeslaChart';
 import { TeslaButton } from '../../components/TeslaButton';
 import {
   Car,
@@ -26,6 +25,7 @@ import QuickStats from './components/QuickStats';
 import QuickActions from './components/QuickActions';
 import CriticalAlerts from './components/CriticalAlerts';
 import UserProfileModal from './components/UserProfileModal';
+import { QuickChart } from './components/QuickChart';
 
 interface DashboardScreenProps {
   onNavigate: (screen: 'dashboard' | 'history' | 'alerts' | 'garage') => void;
@@ -211,12 +211,12 @@ export default function DashboardScreen({ onNavigate, onOpenModal }: DashboardSc
 
             {/* Expense breakdown chart */}
             <TeslaCard title="Distribuição de Gastos">
-              <TeslaChart type="category" data={categoryChartData} />
+              <QuickChart type="category" data={categoryChartData} />
             </TeslaCard>
 
             {/* Monthly cost history chart */}
             <TeslaCard title="Histórico de Custos Mensais">
-              <TeslaChart type="history" data={historyChartData} />
+              <QuickChart type="history" data={historyChartData} />
             </TeslaCard>
 
             {/* Navigation Widget shortcuts */}

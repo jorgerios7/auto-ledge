@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors } from '../theme/colors';
+import { colors } from '../../../theme/colors';
+import { formatCurrency } from '../../../utils/format';
 
 interface CategoryData {
   label: string;
@@ -19,10 +20,9 @@ interface TeslaChartProps {
   currencySymbol?: string;
 }
 
-export const TeslaChart = ({
+export const QuickChart = ({
   type,
   data,
-  currencySymbol = 'R$',
 }: TeslaChartProps) => {
   if (type === 'category') {
     const catData = data as CategoryData[];
@@ -39,7 +39,7 @@ export const TeslaChart = ({
               {catData.map((item, index) => {
                 const percentage = total > 0 ? (item.value / total) * 100 : 0;
                 if (percentage === 0) return null;
-                
+
                 return (
                   <View
                     key={`bar-${index}`}
@@ -71,7 +71,7 @@ export const TeslaChart = ({
                       <Text style={styles.legendLabel}>{item.label}</Text>
                     </View>
                     <Text style={styles.legendValue}>
-                      {currencySymbol} {item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {formatCurrency(item.value)}
                       <Text style={styles.legendPercentage}> ({percentage}%)</Text>
                     </Text>
                   </View>
@@ -97,19 +97,20 @@ export const TeslaChart = ({
           {histData.map((item, index) => {
             const widthPercentage = (item.value / maxValue) * 100;
             return (
+              item.value > 0 &&
               <View key={`hist-${index}`} style={styles.histItem}>
                 <View style={styles.histTextRow}>
                   <Text style={styles.histLabel}>{item.label}</Text>
                   <Text style={styles.histValue}>
-                    {currencySymbol} {item.value.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                    {formatCurrency(item.value)}
                   </Text>
                 </View>
                 <View style={styles.histBarBg}>
-                  <View 
+                  <View
                     style={[
-                      styles.histBarFill, 
+                      styles.histBarFill,
                       { width: `${Math.max(widthPercentage, 4)}%` }
-                    ]} 
+                    ]}
                   />
                 </View>
               </View>
