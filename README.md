@@ -1,6 +1,6 @@
-# Auto Ledge
+# AutoLedge
 
-Auto Ledge is a mobile application designed to help vehicle owners manage and preserve the complete maintenance history of their cars.
+AutoLedge is a mobile application designed to help vehicle owners manage and preserve the complete maintenance history of their cars.
 
 The platform goes beyond simple service tracking by providing a digital vehicle record system, allowing users to register preventive and corrective maintenance, store invoices and documents, monitor expenses, receive maintenance reminders, and gain insights into vehicle health over time.
 
@@ -20,7 +20,7 @@ The platform goes beyond simple service tracking by providing a digital vehicle 
 
 ## Vision
 
-Auto Ledge aims to become the digital maintenance passport for vehicle owners, transforming maintenance records into a valuable asset that improves vehicle reliability, reduces ownership costs, and increases resale confidence.
+AutoLedge aims to become the digital maintenance passport for vehicle owners, transforming maintenance records into a valuable asset that improves vehicle reliability, reduces ownership costs, and increases resale confidence.
 
 ## Tech Stack
 
