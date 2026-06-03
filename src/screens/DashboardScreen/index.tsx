@@ -26,6 +26,7 @@ import QuickActions from './components/QuickActions';
 import CriticalAlerts from './components/CriticalAlerts';
 import UserProfileModal from './components/UserProfileModal';
 import { QuickChart } from './components/QuickChart';
+import { DashboardHeader } from './components/DashboardHeader';
 
 interface DashboardScreenProps {
   onNavigate: (screen: 'dashboard' | 'history' | 'alerts' | 'garage') => void;
@@ -42,6 +43,8 @@ export default function DashboardScreen({ onNavigate, onOpenModal }: DashboardSc
     fuelLogs,
     alerts
   } = useApp();
+
+  if (!user) return null;
 
   const [showProfileModal, setShowProfileModal] = useState(false);
 
@@ -147,16 +150,7 @@ export default function DashboardScreen({ onNavigate, onOpenModal }: DashboardSc
 
   return (
     <View style={styles.container}>
-      {/* Top Navbar */}
-      <View style={styles.navbar}>
-        <View>
-          <Text style={styles.welcomeText}>OLÁ,</Text>
-          <Text style={styles.userName}>{user?.displayName?.toUpperCase() || 'JORGE RIOS'}</Text>
-        </View>
-        <TouchableOpacity onPress={() => setShowProfileModal(true)} style={styles.logoutBtn}>
-          <UserIcon size={20} color={colors.text} />
-        </TouchableOpacity>
-      </View>
+      <DashboardHeader user={user} onPressProfile={() => setShowProfileModal(true)} />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Vehicles Horizontal Switcher */}
