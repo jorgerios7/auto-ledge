@@ -13,7 +13,7 @@ import {
 import { auth as firebaseAuth, googleWebClientId } from '../services/firebase';
 import { db } from '../services/db';
 import { Timestamp } from 'firebase/firestore';
-import { User, Vehicle, Maintenance, FuelLog, Alert, AppData } from '../types';
+import { User, Vehicle, Maintenance, FuelLog, Alert } from '../types';
 
 let GoogleSignin: any = null;
 try {
@@ -148,7 +148,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         await db.createUserDoc(
           userId,
           firebaseAuth?.currentUser?.email || '',
-          firebaseAuth?.currentUser?.displayName || 'Usuário'
+          firebaseAuth?.currentUser?.displayName || 'Usuário',
+          firebaseAuth?.currentUser?.photoURL || '',
         );
         appData = await db.getAppData(userId);
       }
@@ -255,7 +256,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
         await updateProfile(userCredential.user, { displayName: name });
 
-        await db.createUserDoc(userCredential.user.uid, userCredential.user.email || '', name);
+        await db.createUserDoc(userCredential.user.uid, userCredential.user.email || '', name, userCredential.user.photoURL || '');
       } else {
         throw new Error('Firebase Auth not initialized.');
       }
@@ -357,6 +358,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       await GoogleSignin.hasPlayServices();
       const response: any = await GoogleSignin.signIn();
 
+      await GoogleSignin.configure({
+        webClienteId: response.idToken
+      })
+
       const idToken = response?.idToken || response?.data?.idToken;
 
       if (!idToken) {
@@ -373,7 +378,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         await db.createUserDoc(
           firebaseUser.uid,
           firebaseUser.email || '',
-          firebaseUser.displayName || 'Usuário Google'
+          firebaseUser.displayName || '',
+          firebaseUser.photoURL || '',
         );
       }
     } catch (error: any) {

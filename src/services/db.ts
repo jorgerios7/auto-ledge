@@ -25,14 +25,15 @@ export const db = {
     return null;
   },
 
-  createUserDoc: async (userId: string, email: string, displayName: string): Promise<void> => {
+  createUserDoc: async (userId: string, email: string, displayName: string, photoURL: string): Promise<void> => {
     if (!firestoreDb) throw new Error('Firestore not initialized');
     const docRef = doc(firestoreDb, 'users', userId);
     await setDoc(docRef, {
       email,
       displayName,
       createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
+      updatedAt: Timestamp.now(),
+      photoURL
     });
   },
 

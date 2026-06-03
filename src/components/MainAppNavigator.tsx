@@ -92,58 +92,30 @@ export function MainAppNavigator() {
         }
     };
 
+    const renderTabItem = (tab: 'dashboard' | 'maintenance' | 'fuel' | 'alerts' | 'garage', label: string, Icon: any) => (
+        <TouchableOpacity
+            style={styles.tabItem}
+            onPress={() => { setActiveTab(tab); handleCloseModal(); }}
+            activeOpacity={0.7}
+        >
+            <Icon size={20} color={activeTab === tab ? colors.text : colors.textSecondary} />
+            <Text style={[styles.tabLabel, activeTab === tab && styles.tabLabelActive]}>{label}</Text>
+        </TouchableOpacity>
+    );
+
     return (
         <View style={{ ...styles.container, paddingBottom: Math.max(insets.bottom, 16) }}>
-            <View style={styles.screenArea}>
+            <View style={styles.screenArea} accessibilityLabel="Área de conteúdo principal">
                 {renderActiveScreen()}
             </View>
 
             {/* Tesla Minimal Tab Bar */}
-            <View style={styles.tabBar}>
-                <TouchableOpacity
-                    style={styles.tabItem}
-                    onPress={() => { setActiveTab('dashboard'); handleCloseModal(); }}
-                    activeOpacity={0.7}
-                >
-                    <LayoutGrid size={20} color={activeTab === 'dashboard' ? colors.text : colors.textSecondary} />
-                    <Text style={[styles.tabLabel, activeTab === 'dashboard' && styles.tabLabelActive]}>Painel</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.tabItem}
-                    onPress={() => { setActiveTab('maintenance'); handleCloseModal(); }}
-                    activeOpacity={0.7}
-                >
-                    <Wrench size={20} color={activeTab === 'maintenance' ? colors.text : colors.textSecondary} />
-                    <Text style={[styles.tabLabel, activeTab === 'maintenance' && styles.tabLabelActive]}>Serviços</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.tabItem}
-                    onPress={() => { setActiveTab('fuel'); handleCloseModal(); }}
-                    activeOpacity={0.7}
-                >
-                    <Droplet size={20} color={activeTab === 'fuel' ? colors.text : colors.textSecondary} />
-                    <Text style={[styles.tabLabel, activeTab === 'fuel' && styles.tabLabelActive]}>Recarga</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.tabItem}
-                    onPress={() => { setActiveTab('alerts'); handleCloseModal(); }}
-                    activeOpacity={0.7}
-                >
-                    <Bell size={20} color={activeTab === 'alerts' ? colors.text : colors.textSecondary} />
-                    <Text style={[styles.tabLabel, activeTab === 'alerts' && styles.tabLabelActive]}>Alertas</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.tabItem}
-                    onPress={() => { setActiveTab('garage'); handleCloseModal(); }}
-                    activeOpacity={0.7}
-                >
-                    <Car size={20} color={activeTab === 'garage' ? colors.text : colors.textSecondary} />
-                    <Text style={[styles.tabLabel, activeTab === 'garage' && styles.tabLabelActive]}>Garagem</Text>
-                </TouchableOpacity>
+            <View style={styles.tabBar} accessibilityLabel="Barra de navegação principal">
+                {renderTabItem('dashboard', 'Painel', LayoutGrid)}
+                {renderTabItem('maintenance', 'Serviços', Wrench)}
+                {renderTabItem('fuel', 'Abastecimentos', Droplet)}
+                {renderTabItem('alerts', 'Alertas', Bell)}
+                {renderTabItem('garage', 'Garagem', Car)}
             </View>
             <StatusBar style="light" />
         </View>
