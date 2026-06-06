@@ -104,6 +104,15 @@ export const db = {
     await setDoc(docRef, dataToSave);
   },
 
+  updateVehicleOdometer: async (userId: string, vehicleId: string, odometer: number): Promise<void> => {
+    if (!firestoreDb) throw new Error('Firestore not initialized');
+    const docRef = doc(firestoreDb, 'users', userId, 'vehicles', vehicleId);
+    await updateDoc(docRef, {
+      currentOdometer: odometer,
+      updatedAt: Timestamp.now()
+    });
+  },
+
   deleteVehicle: async (userId: string, vehicleId: string): Promise<void> => {
     if (!firestoreDb) throw new Error('Firestore not initialized');
 

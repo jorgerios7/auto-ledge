@@ -5,11 +5,18 @@ import { styles } from '../styles';
 
 interface CarGraphicProps {
   vehicle: Vehicle;
+  isLive?: boolean;
 }
 
-export default function CarGraphic({ vehicle }: CarGraphicProps) {
+export default function CarGraphic({ vehicle, isLive = false }: CarGraphicProps) {
   return (
     <View style={styles.carGraphicContainer}>
+      {isLive && (
+        <View style={styles.liveBadge}>
+          <View style={styles.liveDot} />
+          <Text style={styles.liveText}>OBD2 LIVE</Text>
+        </View>
+      )}
       <View style={styles.carChassis}>
         {/* Wheels */}
         <View style={[styles.wheel, styles.wheelFL]} />

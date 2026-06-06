@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "cover",
@@ -29,7 +29,25 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": false,
+          "modes": [
+            "peripheral",
+            "central"
+          ],
+          "bluetoothAlwaysPermission": "Este aplicativo precisa de acesso ao Bluetooth para conectar ao adaptador OBD2."
+        }
+      ],
+      [
+        "with-rn-bluetooth-classic",
+        {
+          "peripheralUsageDescription": "Este aplicativo precisa de acesso ao Bluetooth para conectar ao adaptador OBD2.",
+          "alwaysUsageDescription": "Este aplicativo precisa de acesso ao Bluetooth para conectar ao adaptador OBD2."
+        }
+      ]
     ]
   }
 }

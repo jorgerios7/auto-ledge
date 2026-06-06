@@ -6,18 +6,33 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useApp } from '../../context/AppContext';
+import { useObd } from '../../context/ObdContext';
 import { TeslaCard } from '../../components/TeslaCard';
 import { TeslaButton } from '../../components/TeslaButton';
+import { ObdConnectionModal } from '../../components/ObdConnectionModal';
 import {
   Car,
   ChevronRight,
   Bell,
   Wrench,
   User as UserIcon,
-  Plus
+  Plus,
+  Bluetooth,
+  Thermometer,
+  Activity
 } from 'lucide-react-native';
 import { colors } from '../../theme/colors';
 import { styles } from './styles';
+
+// Wrap Lucide components to prevent React 19 / TypeScript compilation issues
+const CarIcon = Car as React.ComponentType<any>;
+const ChevronRightIcon = ChevronRight as React.ComponentType<any>;
+const BellIcon = Bell as React.ComponentType<any>;
+const WrenchIcon = Wrench as React.ComponentType<any>;
+const PlusIcon = Plus as React.ComponentType<any>;
+const BluetoothIcon = Bluetooth as React.ComponentType<any>;
+const ThermometerIcon = Thermometer as React.ComponentType<any>;
+const ActivityIcon = Activity as React.ComponentType<any>;
 
 // Import subcomponents
 import CarGraphic from './components/CarGraphic';
@@ -44,9 +59,17 @@ export default function DashboardScreen({ onNavigate, onOpenModal }: DashboardSc
     alerts
   } = useApp();
 
+  const {
+    connectionStatus,
+    coolantTemp,
+    fuelLevel,
+    mockMode
+  } = useObd();
+
   if (!user) return null;
 
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showObdModal, setShowObdModal] = useState(false);
 
   // Calculations
   const totalMaintCost = maintenances.reduce((sum, m) => sum + m.totalCost, 0);
@@ -158,7 +181,7 @@ export default function DashboardScreen({ onNavigate, onOpenModal }: DashboardSc
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Sua Garagem</Text>
             <TouchableOpacity onPress={() => onNavigate('garage')} style={styles.addVehIcon}>
-              <Plus size={16} color={colors.text} />
+              <PlusIcon size={16} color={colors.text} />
             </TouchableOpacity>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.vehiclesScroll}>
@@ -170,7 +193,7 @@ export default function DashboardScreen({ onNavigate, onOpenModal }: DashboardSc
                   style={[styles.vehTab, isActive && styles.vehTabActive]}
                   onPress={() => setSelectedVehicle(veh)}
                 >
-                  <Car size={16} color={isActive ? colors.background : colors.textMuted} style={styles.vehTabIcon} />
+                  <CarIcon size={16} color={isActive ? colors.background : colors.textMuted} style={styles.vehTabIcon} />
                   <Text style={[styles.vehTabText, isActive && styles.vehTabTextActive]}>
                     {veh.model}
                   </Text>
@@ -179,7 +202,7 @@ export default function DashboardScreen({ onNavigate, onOpenModal }: DashboardSc
             })}
             {vehicles.length === 0 && (
               <TouchableOpacity style={styles.vehTab} onPress={() => onOpenModal('vehicle')}>
-                <Plus size={16} color={colors.textMuted} style={styles.vehTabIcon} />
+                <PlusIcon size={16} color={colors.textMuted} style={styles.vehTabIcon} />
                 <Text style={styles.vehTabText}>Adicionar</Text>
               </TouchableOpacity>
             )}
@@ -188,7 +211,71 @@ export default function DashboardScreen({ onNavigate, onOpenModal }: DashboardSc
 
         {selectedVehicle ? (
           <View style={styles.mainDashboard}>
-            <CarGraphic vehicle={selectedVehicle} />
+            {/* OBD2 Status Bar */}
+            <View style={styles.obdStatusBar}>
+              <View style={styles.obdStatusLeft}>
+                <BluetoothIcon size={16} color={
+                  connectionStatus === 'connected' ? colors.success :
+                  connectionStatus === 'connecting' ? '#FFB300' :
+                  connectionStatus === 'error' ? colors.error : colors.textMuted
+                } />
+                <Text style={styles.obdStatusTitle}>
+                  {connectionStatus === 'connected' ? (mockMode ? 'OBD2 SIMULADOR' : 'OBD2 CONECTADO') :
+                   connectionStatus === 'connecting' ? 'CONECTANDO OBD2...' :
+                   connectionStatus === 'error' ? 'ERRO OBD2' : 'ADAPTADOR OBD2'}
+                </Text>
+              </View>
+              <TouchableOpacity 
+                style={styles.obdStatusAction} 
+                onPress={() => setShowObdModal(true)}
+              >
+                <Text style={styles.obdStatusActionText}>
+                  {connectionStatus === 'connected' ? 'GERENCIAR' : 'CONECTAR'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Display live indicators when OBD2 is connected */}
+            {connectionStatus === 'connected' && (
+              <View style={styles.obdTelemetryContainer}>
+                <View style={styles.obdTelemetryGrid}>
+                  <View style={styles.obdTelemetryCard}>
+                    <View style={styles.obdTelemetryCardHeader}>
+                      <ThermometerIcon size={14} color={colors.textMuted} />
+                      <Text style={styles.obdTelemetryCardLabel}>Temperatura</Text>
+                    </View>
+                    <Text style={[
+                      styles.obdTelemetryCardValue, 
+                      coolantTemp !== null && coolantTemp > 100 ? { color: colors.error } : null
+                    ]}>
+                      {coolantTemp !== null ? `${coolantTemp}°C` : '--'}
+                    </Text>
+                    <Text style={styles.obdTelemetryCardSubText}>
+                      {coolantTemp !== null 
+                        ? (coolantTemp > 100 ? 'Motor Quente!' : coolantTemp < 70 ? 'Aquecendo' : 'Normal')
+                        : 'Sem sinal'}
+                    </Text>
+                  </View>
+
+                  <View style={styles.obdTelemetryCard}>
+                    <View style={styles.obdTelemetryCardHeader}>
+                      <ActivityIcon size={14} color={colors.textMuted} />
+                      <Text style={styles.obdTelemetryCardLabel}>Combustível</Text>
+                    </View>
+                    <Text style={styles.obdTelemetryCardValue}>
+                      {fuelLevel !== null ? `${fuelLevel}%` : '--'}
+                    </Text>
+                    <Text style={styles.obdTelemetryCardSubText}>
+                      {fuelLevel !== null 
+                        ? (fuelLevel < 15 ? 'Reserva!' : 'Nível seguro') 
+                        : 'Sem sinal'}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            <CarGraphic vehicle={selectedVehicle} isLive={connectionStatus === 'connected'} />
 
             <QuickStats
               totalExpenses={totalExpenses}
@@ -217,12 +304,12 @@ export default function DashboardScreen({ onNavigate, onOpenModal }: DashboardSc
             <TeslaCard title="Status do Sistema" onPress={() => onNavigate('alerts')}>
               <View style={styles.statusRow}>
                 <View style={styles.statusInfo}>
-                  <Bell size={18} color={colors.textMuted} />
+                  <BellIcon size={18} color={colors.textMuted} />
                   <Text style={styles.statusLabel}>Alertas Pendentes</Text>
                 </View>
                 <View style={styles.statusBadge}>
                   <Text style={styles.statusBadgeText}>{pendingAlertsCount}</Text>
-                  <ChevronRight size={16} color={colors.textMuted} />
+                  <ChevronRightIcon size={16} color={colors.textMuted} />
                 </View>
               </View>
             </TeslaCard>
@@ -230,19 +317,19 @@ export default function DashboardScreen({ onNavigate, onOpenModal }: DashboardSc
             <TeslaCard title="Histórico Recente" onPress={() => onNavigate('history')}>
               <View style={styles.statusRow}>
                 <View style={styles.statusInfo}>
-                  <Wrench size={18} color={colors.textMuted} />
+                  <WrenchIcon size={18} color={colors.textMuted} />
                   <Text style={styles.statusLabel}>Manutenções Realizadas</Text>
                 </View>
                 <View style={styles.statusBadge}>
                   <Text style={styles.statusBadgeText}>{maintenances.length}</Text>
-                  <ChevronRight size={16} color={colors.textMuted} />
+                  <ChevronRightIcon size={16} color={colors.textMuted} />
                 </View>
               </View>
             </TeslaCard>
           </View>
         ) : (
           <View style={styles.noVehicleContainer}>
-            <Car size={48} color={colors.mediumGray} style={{ marginBottom: 16 }} />
+            <CarIcon size={48} color={colors.mediumGray} style={{ marginBottom: 16 }} />
             <Text style={styles.noVehicleText}>Nenhum veículo selecionado ou cadastrado.</Text>
             <TeslaButton
               title="Adicionar Veículo"
@@ -258,6 +345,12 @@ export default function DashboardScreen({ onNavigate, onOpenModal }: DashboardSc
       <UserProfileModal
         visible={showProfileModal}
         onClose={() => setShowProfileModal(false)}
+      />
+
+      {/* OBD2 Connection Modal */}
+      <ObdConnectionModal
+        visible={showObdModal}
+        onClose={() => setShowObdModal(false)}
       />
     </View>
   );

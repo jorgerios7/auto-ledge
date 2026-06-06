@@ -1,0 +1,65 @@
+diff --git a/node_modules/react-native-bluetooth-classic/android/src/main/java/kjd/reactnative/bluetooth/RNBluetoothClassicModule.java b/node_modules/react-native-bluetooth-classic/android/src/main/java/kjd/reactnative/bluetooth/RNBluetoothClassicModule.java
+index f994a0a..91705f2 100644
+--- a/node_modules/react-native-bluetooth-classic/android/src/main/java/kjd/reactnative/bluetooth/RNBluetoothClassicModule.java
++++ b/node_modules/react-native-bluetooth-classic/android/src/main/java/kjd/reactnative/bluetooth/RNBluetoothClassicModule.java
+@@ -466,13 +466,16 @@ public class RNBluetoothClassicModule
+             promise.reject(Exceptions.BLUETOOTH_NOT_ENABLED.name(),
+                     Exceptions.BLUETOOTH_NOT_ENABLED.message());
+         } else {
+-            WritableArray bonded = Arguments.createArray();
+-            for (BluetoothDevice device : mAdapter.getBondedDevices()) {
+-                NativeDevice nativeDevice = new NativeDevice(device);
+-                bonded.pushMap(nativeDevice.map());
++            try {
++                WritableArray bonded = Arguments.createArray();
++                for (BluetoothDevice device : mAdapter.getBondedDevices()) {
++                    NativeDevice nativeDevice = new NativeDevice(device);
++                    bonded.pushMap(nativeDevice.map());
++                }
++                promise.resolve(bonded);
++            } catch (Throwable t) {
++                promise.reject("GET_BONDED_DEVICES_FAILED", t.getMessage(), t);
+             }
+-
+-            promise.resolve(bonded);
+         }
+     }
+ 
+@@ -881,6 +884,8 @@ public class RNBluetoothClassicModule
+                             promise.resolve(nativeDevice.map());
+                         } catch (IOException e) {
+                             promise.reject(new ConnectionFailedException(nativeDevice, e));
++                        } catch (Throwable t) {
++                            promise.reject(new ConnectionFailedException(nativeDevice, t));
+                         }
+                     }
+ 
+@@ -898,6 +903,8 @@ public class RNBluetoothClassicModule
+                 promise.reject(new ConnectionFailedException(nativeDevice, e));
+             } catch (IllegalStateException e) {
+                 promise.reject(e);
++            } catch (Throwable t) {
++                promise.reject(new ConnectionFailedException(nativeDevice, t));
+             }
+         }
+     }
+@@ -918,10 +925,15 @@ public class RNBluetoothClassicModule
+             promise.reject(Exceptions.NOT_CURRENTLY_CONNECTED.name(),
+                     Exceptions.NOT_CURRENTLY_CONNECTED.message(address));
+         } else {
+-            DeviceConnection connection = mConnections.remove(address);
+-            connection.disconnect();
+-
+-            promise.resolve(true);
++            try {
++                DeviceConnection connection = mConnections.remove(address);
++                if (connection != null) {
++                    connection.disconnect();
++                }
++                promise.resolve(true);
++            } catch (Throwable t) {
++                promise.reject("DISCONNECT_FAILED", t.getMessage(), t);
++            }
+         }
+     }
+ 

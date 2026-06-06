@@ -40,6 +40,7 @@ interface AppContextType {
 
   // Db actions
   saveVehicle: (vehicleData: Omit<Vehicle, 'id' | 'userId'> & { id?: string }) => Promise<void>;
+  updateVehicleOdometer: (vehicleId: string, odometer: number) => Promise<void>;
   deleteVehicle: (id: string) => Promise<void>;
   saveMaintenance: (maintData: Omit<Maintenance, 'id' | 'totalCost' | 'vehicleId'> & { id?: string }) => Promise<void>;
   deleteMaintenance: (id: string) => Promise<void>;
@@ -435,6 +436,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateVehicleOdometer = async (vehicleId: string, odometer: number) => {
+    if (!user) return;
+
+    setVehicles(prevVehicles =>
+      prevVehicles.map(v => (v.id === vehicleId ? { ...v, currentOdometer: odometer } : v))
+    );
+
+    setSelectedVehicleState(prevSelected => {
+      if (prevSelected && prevSelected.id === vehicleId) {
+        return { ...prevSelected, currentOdometer: odometer };
+      }
+      return prevSelected;
+    });
+
+    await db.updateVehicleOdometer(user.uid, vehicleId, odometer);
+  };
+
   const deleteVehicle = async (id: string) => {
     if (!user) return;
 
@@ -680,6 +698,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       deleteAccount,
       loginWithGoogle,
       saveVehicle,
+      updateVehicleOdometer,
       deleteVehicle,
       saveMaintenance,
       deleteMaintenance,
