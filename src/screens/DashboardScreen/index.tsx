@@ -21,8 +21,15 @@ import {
   Thermometer,
   Activity
 } from 'lucide-react-native';
-import { colors } from '../../theme/colors';
+import { useTheme } from '../../theme';
 import { styles } from './styles';
+import {
+  getCategoryChartData,
+  getCriticalAlerts,
+  getDistanceCostSummary,
+  getExpenseTotals,
+  getMonthlyExpenseHistory,
+} from '../../features/dashboard/dashboard-metrics';
 
 // Wrap Lucide components to prevent React 19 / TypeScript compilation issues
 const CarIcon = Car as React.ComponentType<any>;
@@ -49,6 +56,7 @@ interface DashboardScreenProps {
 }
 
 export default function DashboardScreen({ onNavigate, onOpenModal }: DashboardScreenProps) {
+  const { colors } = useTheme();
   const {
     user,
     vehicles,
@@ -71,103 +79,11 @@ export default function DashboardScreen({ onNavigate, onOpenModal }: DashboardSc
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showObdModal, setShowObdModal] = useState(false);
 
-  // Calculations
-  const totalMaintCost = maintenances.reduce((sum, m) => sum + m.totalCost, 0);
-  const totalFuelCost = fuelLogs.reduce((sum, f) => sum + f.totalCost, 0);
-  const totalExpenses = totalMaintCost + totalFuelCost;
-
-  // Cost per KM calculation
-  let distance = 0;
-  let costPerKm = 0;
-  if (selectedVehicle && fuelLogs.length > 0) {
-    const odometers = fuelLogs.map(f => f.odometer);
-    if (selectedVehicle.currentOdometer > 0) {
-      odometers.push(selectedVehicle.currentOdometer);
-    }
-    const minOdo = Math.min(...odometers);
-    const maxOdo = Math.max(...odometers);
-    distance = maxOdo - minOdo;
-    costPerKm = distance > 0 ? totalExpenses / distance : 0;
-  }
-
-  // Categories for chart
-  const preventiveCost = maintenances
-    .filter(m => m.type === 'preventive')
-    .reduce((sum, m) => sum + m.totalCost, 0);
-
-  const correctiveCost = maintenances
-    .filter(m => m.type === 'corrective')
-    .reduce((sum, m) => sum + m.totalCost, 0);
-
-  const categoryChartData = [
-    { label: 'Combustível', value: totalFuelCost, color: colors.error },
-    { label: 'Manut. Preventiva', value: preventiveCost, color: colors.text },
-    { label: 'Manut. Corretiva', value: correctiveCost, color: colors.carChassisBorder },
-  ];
-
-  // Group monthly expenses for the last 6 months
-  const generateLast6Months = () => {
-    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const list = [];
-    const d = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const tempDate = new Date(d.getFullYear(), d.getMonth() - i, 1);
-      const mLabel = months[tempDate.getMonth()];
-      const yLabel = tempDate.getFullYear().toString().substring(2);
-      list.push({
-        key: `${tempDate.getFullYear()}-${(tempDate.getMonth() + 1).toString().padStart(2, '0')}`,
-        label: `${mLabel}/${yLabel}`,
-        value: 0
-      });
-    }
-    return list;
-  };
-
-  const monthlyExpenses = generateLast6Months();
-
-  maintenances.forEach(m => {
-    if (!m.date) return;
-    const yearMonth = m.date.substring(0, 7); // 'YYYY-MM'
-    const found = monthlyExpenses.find(item => item.key === yearMonth);
-    if (found) {
-      found.value += m.totalCost;
-    }
-  });
-
-  fuelLogs.forEach(f => {
-    if (!f.date) return;
-    const yearMonth = f.date.substring(0, 7); // 'YYYY-MM'
-    const found = monthlyExpenses.find(item => item.key === yearMonth);
-    if (found) {
-      found.value += f.totalCost;
-    }
-  });
-
-  const historyChartData = monthlyExpenses.map(item => ({
-    label: item.label,
-    value: item.value
-  }));
-
-  // Active / Critical Alerts check
-  const criticalAlertsList = selectedVehicle ? alerts.filter(alert => {
-    if (alert.status === 'completed') return false;
-
-    // Check odometer alert
-    if (alert.type === 'odometer' && alert.targetOdometer) {
-      const remainingKm = alert.targetOdometer - selectedVehicle.currentOdometer;
-      return remainingKm <= 500; // Trigger if within 500 km
-    }
-
-    // Check date alert
-    if (alert.type === 'date' && alert.targetDate) {
-      const targetTime = new Date(alert.targetDate).getTime();
-      const currentTime = new Date().getTime();
-      const diffDays = (targetTime - currentTime) / (1000 * 60 * 60 * 24);
-      return diffDays <= 7; // Trigger if within 7 days
-    }
-
-    return false;
-  }) : [];
+  const { totalFuelCost, totalExpenses } = getExpenseTotals(maintenances, fuelLogs);
+  const { distance, costPerKm } = getDistanceCostSummary(selectedVehicle, fuelLogs, totalExpenses);
+  const categoryChartData = getCategoryChartData(maintenances, totalFuelCost, colors);
+  const historyChartData = getMonthlyExpenseHistory(maintenances, fuelLogs);
+  const criticalAlertsList = getCriticalAlerts(selectedVehicle, alerts);
 
   const pendingAlertsCount = alerts.filter(a => a.status === 'pending').length;
 

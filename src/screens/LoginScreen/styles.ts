@@ -47,6 +47,17 @@ export const styles = StyleSheet.create({
     submitBtn: {
         marginTop: 10,
     },
+    forgotPasswordButton: {
+        alignSelf: 'flex-end',
+        paddingVertical: 4,
+        marginTop: -8,
+        marginBottom: 12,
+    },
+    forgotPasswordText: {
+        color: colors.primary,
+        fontSize: 13,
+        fontWeight: '700',
+    },
     errorText: {
         color: colors.error,
         fontSize: 14,

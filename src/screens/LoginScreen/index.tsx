@@ -12,7 +12,11 @@ import { ToastService } from '../../utils/toast';
 import { styles } from './styles';
 import LoginForm from './components/LoginForm';
 
-export default function LoginScreen() {
+interface LoginScreenProps {
+  onForgotPassword: (email: string) => void;
+}
+
+export default function LoginScreen({ onForgotPassword }: LoginScreenProps) {
   const insets = useSafeAreaInsets();
   const { login, register, loginWithGoogle } = useApp();
   const [isSignUp, setIsSignUp] = useState(false);
@@ -84,6 +88,7 @@ export default function LoginScreen() {
           loadingGoogle={loadingGoogle}
           onSubmit={handleSubmit}
           onGooglePress={handleGoogleLogin}
+          onForgotPassword={() => onForgotPassword(email)}
         />
       </ScrollView>
     </KeyboardAvoidingView>

@@ -5,9 +5,9 @@ import {
   StyleSheet, 
   ActivityIndicator, 
   ViewStyle, 
-  TextStyle 
+  TextStyle
 } from 'react-native';
-import { colors } from '../theme/colors';
+import { AppTheme, useTheme } from '../theme';
 
 interface TeslaButtonProps {
   title: string;
@@ -28,6 +28,10 @@ export const TeslaButton = ({
   style,
   textStyle,
 }: TeslaButtonProps) => {
+  const theme = useTheme();
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
+  const { colors } = theme;
+
   const buttonStyles = [
     styles.button,
     styles[variant],
@@ -62,53 +66,53 @@ export const TeslaButton = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: AppTheme) => StyleSheet.create({
   button: {
-    height: 48,
-    borderRadius: 4,
+    minHeight: 48,
+    borderRadius: theme.radius.md,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 16,
     flexDirection: 'row',
   },
   primary: {
-    backgroundColor: colors.primary,
+    backgroundColor: theme.colors.primary,
   },
   outline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: theme.colors.primary,
   },
   secondary: {
-    backgroundColor: colors.secondary,
+    backgroundColor: theme.colors.secondary,
     borderWidth: 1,
-    borderColor: colors.mediumGray,
+    borderColor: theme.colors.border,
   },
   danger: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: colors.error,
+    borderColor: theme.colors.error,
   },
   disabled: {
-    backgroundColor: colors.disabled,
-    borderColor: colors.disabled,
+    backgroundColor: theme.colors.disabled,
+    borderColor: theme.colors.disabled,
   },
   text: {
-    fontSize: 14,
+    fontSize: theme.typography.bodySmall,
     fontWeight: '700',
-    letterSpacing: 1.5,
+    letterSpacing: 0.2,
     textTransform: 'uppercase',
   },
   textPrimary: {
-    color: colors.background,
+    color: theme.colors.background,
   },
   textLight: {
-    color: colors.text,
+    color: theme.colors.text,
   },
   textDanger: {
-    color: colors.error,
+    color: theme.colors.error,
   },
   textDisabled: {
-    color: colors.disabledText,
+    color: theme.colors.disabledText,
   },
 });

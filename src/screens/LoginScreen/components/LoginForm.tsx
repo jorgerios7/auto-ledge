@@ -17,6 +17,7 @@ interface LoginFormProps {
   loadingGoogle: boolean;
   onSubmit: () => void;
   onGooglePress: () => void;
+  onForgotPassword: () => void;
 }
 
 export default function LoginForm({
@@ -32,6 +33,7 @@ export default function LoginForm({
   loadingGoogle,
   onSubmit,
   onGooglePress,
+  onForgotPassword,
 }: LoginFormProps) {
   return (
     <View style={styles.formContainer}>
@@ -71,6 +73,16 @@ export default function LoginForm({
         autoCorrect={false}
         editable={!loading && !loadingGoogle}
       />
+
+      {!isSignUp && (
+        <TouchableOpacity
+          onPress={onForgotPassword}
+          disabled={loading || loadingGoogle}
+          style={styles.forgotPasswordButton}
+        >
+          <Text style={styles.forgotPasswordText}>Esqueci minha senha</Text>
+        </TouchableOpacity>
+      )}
 
       <TeslaButton
         title={isSignUp ? 'Registrar' : 'Entrar'}

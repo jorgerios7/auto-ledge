@@ -6,7 +6,7 @@ import {
   TouchableOpacity, 
   ViewStyle 
 } from 'react-native';
-import { colors } from '../theme/colors';
+import { AppTheme, useTheme } from '../theme';
 
 interface TeslaCardProps {
   title?: string;
@@ -27,6 +27,9 @@ export const TeslaCard = ({
   headerRight,
   borderAccent = false,
 }: TeslaCardProps) => {
+  const theme = useTheme();
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
+
   const cardContent = (
     <View style={[
       styles.card, 
@@ -57,19 +60,19 @@ export const TeslaCard = ({
   return cardContent;
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: AppTheme) => StyleSheet.create({
   card: {
-    backgroundColor: colors.surfaceCard,
+    backgroundColor: theme.colors.surfaceCard,
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.lg,
     padding: 16,
     marginBottom: 16,
     width: '100%',
   },
   cardAccent: {
     borderLeftWidth: 3,
-    borderLeftColor: colors.error,
+    borderLeftColor: theme.colors.error,
   },
   header: {
     flexDirection: 'row',
@@ -81,15 +84,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: colors.text,
-    fontSize: 14,
+    color: theme.colors.text,
+    fontSize: theme.typography.bodySmall,
     fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
+    letterSpacing: 0.4,
   },
   subtitle: {
-    color: colors.textMuted,
-    fontSize: 12,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption,
     marginTop: 4,
   },
   body: {

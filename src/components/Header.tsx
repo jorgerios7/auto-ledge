@@ -1,18 +1,22 @@
+import React from "react";
 import { ArrowLeft, Plus, X } from "lucide-react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { colors } from "../theme/colors";
+import { AppTheme, useTheme } from "../theme";
 
 type iconType = "ArrowLeft" | "Plus" | "None"
 type positionType = "left_title" | "right_title"
 
 export default function Header({ iconType, onPress, title, position }: { iconType: iconType, onPress: () => void; title: string, position: positionType }) {
+    const theme = useTheme();
+    const styles = React.useMemo(() => createStyles(theme), [theme]);
+
     return (
         <View style={styles.header}>
             {position === "left_title" &&
                 <>
                     <TouchableOpacity onPress={onPress} style={styles.backBtn}>
-                        {iconType === "ArrowLeft" && <ArrowLeft size={20} color={colors.text} />}
-                        {iconType === "Plus" && <Plus size={20} color={colors.text} />}
+                        {iconType === "ArrowLeft" && <ArrowLeft size={20} color={theme.colors.text} />}
+                        {iconType === "Plus" && <Plus size={20} color={theme.colors.text} />}
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>{title}</Text>
                 </>
@@ -21,8 +25,8 @@ export default function Header({ iconType, onPress, title, position }: { iconTyp
                 <>
                     <Text style={styles.headerTitle}>{title}</Text>
                     <TouchableOpacity onPress={onPress} style={styles.backBtn}>
-                        {iconType === "ArrowLeft" && <ArrowLeft size={20} color={colors.text} />}
-                        {iconType === "Plus" && <Plus size={20} color={colors.text} />}
+                        {iconType === "ArrowLeft" && <ArrowLeft size={20} color={theme.colors.text} />}
+                        {iconType === "Plus" && <Plus size={20} color={theme.colors.text} />}
                     </TouchableOpacity>
                 </>
             }
@@ -30,7 +34,7 @@ export default function Header({ iconType, onPress, title, position }: { iconTyp
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: AppTheme) => StyleSheet.create({
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -39,7 +43,7 @@ const styles = StyleSheet.create({
         paddingTop: 60,
         paddingBottom: 16,
         borderBottomWidth: 0.5,
-        borderBottomColor: colors.border,
+        borderBottomColor: theme.colors.border,
     },
     backBtn: {
         width: 40,
@@ -50,8 +54,8 @@ const styles = StyleSheet.create({
         marginLeft: -10,
     },
     headerTitle: {
-        color: colors.text,
-        fontSize: 20,
+        color: theme.colors.text,
+        fontSize: theme.typography.subtitle,
         fontWeight: '700',
     },
 })

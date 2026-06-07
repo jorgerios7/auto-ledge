@@ -1,5 +1,6 @@
+import React from "react";
 import { KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { colors } from "../theme/colors";
+import { AppTheme, useTheme } from "../theme";
 import { X } from "lucide-react-native";
 
 interface Props {
@@ -17,13 +18,15 @@ interface HeaderProps {
 }
 
 export function CustomModal({ visible, onClose, loading, headerTitle, children }: Props) {
+    const theme = useTheme();
+    const styles = React.useMemo(() => createStyles(theme), [theme]);
 
     function Header({ title, onClose, loading }: HeaderProps) {
         return (
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>{title}</Text>
                 <TouchableOpacity onPress={onClose} style={styles.closeBtn} disabled={loading}>
-                    <X size={20} color={colors.text} />
+                    <X size={20} color={theme.colors.text} />
                 </TouchableOpacity>
             </View>
         );
@@ -51,19 +54,19 @@ export function CustomModal({ visible, onClose, loading, headerTitle, children }
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: AppTheme) => StyleSheet.create({
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+        backgroundColor: theme.colors.overlay,
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
     },
     content: {
-        backgroundColor: colors.surface,
+        backgroundColor: theme.colors.surface,
         borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 8,
+        borderColor: theme.colors.border,
+        borderRadius: theme.radius.lg,
         width: '100%',
         maxHeight: '90%',
         paddingHorizontal: 20,
@@ -75,21 +78,21 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         borderBottomWidth: 0.5,
-        borderBottomColor: colors.border,
+        borderBottomColor: theme.colors.border,
         paddingBottom: 16,
     },
     headerTitle: {
-        fontSize: 14,
+        fontSize: theme.typography.bodySmall,
         fontWeight: '700',
-        color: colors.text,
-        letterSpacing: 1.2,
+        color: theme.colors.text,
+        letterSpacing: 0.4,
         textTransform: 'uppercase',
     },
     closeBtn: {
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: colors.border,
+        backgroundColor: theme.colors.secondary,
         justifyContent: 'center',
         alignItems: 'center',
     },

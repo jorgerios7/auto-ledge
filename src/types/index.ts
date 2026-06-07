@@ -1,27 +1,121 @@
-import { Timestamp } from "firebase/firestore";
+import { Timestamp } from 'firebase/firestore';
 
-export interface User {
-  uid: string;
+export type DocumentId = string;
+
+export interface FirestoreDocument {
+  id: DocumentId;
+}
+
+export interface TimestampFields {
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+}
+
+export interface UserDocument {
   email: string;
   displayName: string;
+  photoURL?: string;
+  activeVehicleId?: DocumentId;
   createdAt: Timestamp;
   updatedAt: Timestamp;
-  activeVehicleId?: string;
+}
+
+export interface User extends UserDocument {
+  uid: DocumentId;
 }
 
 export type FuelType = 'Gasolina' | 'Álcool' | 'Flex' | 'Diesel' | 'Elétrico';
 
-export interface Vehicle {
-  id: string;
-  userId: string;
+export interface VehicleDocument extends FirestoreDocument, TimestampFields {
+  userId: DocumentId;
   plate: string;
   brand: string;
   model: string;
   engine: string;
   fuelType: FuelType;
   currentOdometer: number;
-  createdAt?: Timestamp;
 }
+
+export type Vehicle = VehicleDocument;
+
+export type MaintenanceType = 'preventive' | 'corrective';
+
+export interface MaintenanceTimestamps {
+  createdAt: Timestamp;
+  updatedAt?: Timestamp;
+}
+
+export interface MaintenanceDocument extends FirestoreDocument {
+  vehicleId: DocumentId;
+  type: MaintenanceType;
+  description: string;
+  partsCost: number;
+  laborCost: number;
+  totalCost: number;
+  date: string;
+  partsDetail?: string;
+  attachmentUri?: string;
+  odometer?: number;
+  timestamps?: MaintenanceTimestamps;
+}
+
+export type Maintenance = MaintenanceDocument;
+
+export interface FuelLogDocument extends FirestoreDocument, TimestampFields {
+  vehicleId: DocumentId;
+  date: string;
+  liters: number;
+  totalCost: number;
+  odometer: number;
+}
+
+export type FuelLog = FuelLogDocument;
+
+export type AlertType = 'date' | 'odometer';
+export type AlertStatus = 'pending' | 'completed';
+
+export interface AlertDocument extends FirestoreDocument, TimestampFields {
+  vehicleId: DocumentId;
+  type: AlertType;
+  title: string;
+  targetDate?: string;
+  targetOdometer?: number;
+  status: AlertStatus;
+  maintenanceId?: DocumentId;
+}
+
+export type Alert = AlertDocument;
+
+export interface AppCollections {
+  user: User;
+  vehicles: VehicleDocument[];
+  maintenance: MaintenanceDocument[];
+  fuelLogs: FuelLogDocument[];
+  alerts: AlertDocument[];
+}
+
+export interface AppDataDocument {
+  data: AppCollections;
+}
+
+export type AppData = AppDataDocument;
+
+export type VehicleFormData = Omit<VehicleDocument, 'id' | 'userId' | 'createdAt' | 'updatedAt'> & {
+  id?: DocumentId;
+};
+
+export type MaintenanceFormData = Omit<MaintenanceDocument, 'id' | 'totalCost' | 'vehicleId'> & {
+  id?: DocumentId;
+};
+
+export type FuelLogFormData = Omit<FuelLogDocument, 'id' | 'vehicleId' | 'createdAt' | 'updatedAt'> & {
+  id?: DocumentId;
+};
+
+export type AlertFormData = Omit<AlertDocument, 'id' | 'status' | 'vehicleId' | 'createdAt' | 'updatedAt'> & {
+  id?: DocumentId;
+  status?: AlertStatus;
+};
 
 export const defaultVehicle: Vehicle = {
   id: '',
@@ -32,27 +126,7 @@ export const defaultVehicle: Vehicle = {
   engine: '',
   fuelType: 'Flex',
   currentOdometer: 0,
-}
-
-export type MaintenanceType = 'preventive' | 'corrective';
-
-export interface Maintenance {
-  id: string;
-  vehicleId: string;
-  type: MaintenanceType;
-  description: string;
-  partsCost: number;
-  laborCost: number;
-  totalCost: number;
-  date: string;
-  partsDetail?: string;
-  attachmentUri?: string;
-  odometer?: number;
-  timestamps?: {
-    createdAt: Timestamp;
-    updatedAt?: Timestamp;
-  };
-}
+};
 
 export const defaultMaintenance: Maintenance = {
   id: '',
@@ -65,17 +139,7 @@ export const defaultMaintenance: Maintenance = {
   date: '',
   partsDetail: '',
   attachmentUri: '',
-}
-
-export interface FuelLog {
-  id: string;
-  vehicleId: string;
-  date: string;
-  liters: number;
-  totalCost: number;
-  odometer: number;
-  createdAt?: Timestamp;
-}
+};
 
 export const defaultFuelLog: FuelLog = {
   id: '',
@@ -84,22 +148,7 @@ export const defaultFuelLog: FuelLog = {
   liters: 0,
   totalCost: 0,
   odometer: 0,
-}
-
-export type AlertType = 'date' | 'odometer';
-export type AlertStatus = 'pending' | 'completed';
-
-export interface Alert {
-  id: string;
-  vehicleId: string;
-  type: AlertType;
-  title: string;
-  targetDate?: string;
-  targetOdometer?: number;
-  status: AlertStatus;
-  maintenanceId?: string;
-  createdAt?: Timestamp;
-}
+};
 
 export const defaultAlert: Alert = {
   id: '',
@@ -109,14 +158,4 @@ export const defaultAlert: Alert = {
   targetDate: '',
   targetOdometer: 0,
   status: 'pending',
-}
-
-export interface AppData {
-  data: {
-    user: User;
-    vehicles: Vehicle[];
-    maintenance: Maintenance[];
-    fuelLogs: FuelLog[];
-    alerts: Alert[];
-  }
-}
+};

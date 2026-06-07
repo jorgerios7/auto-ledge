@@ -1,8 +1,9 @@
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "../context/AppContext";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import LoginScreen from "../screens/LoginScreen";
+import PasswordRecoveryScreen from "../screens/PasswordRecoveryScreen";
 import { StatusBar } from "expo-status-bar";
 import DashboardScreen from "../screens/DashboardScreen";
 import MaintenanceScreen from "../screens/MaintenanceScreen";
@@ -10,19 +11,38 @@ import FuelScreen from "../screens/FuelScreen";
 import AlertsScreen from "../screens/AlertScreen";
 import VehiclesScreen from "../screens/VehiclesScreen";
 import { Bell, Car, Droplet, LayoutGrid, Wrench } from "lucide-react-native";
-import { colors } from "../theme/colors";
+import { AppTheme, useTheme } from "../theme";
+
+type MainTab = 'dashboard' | 'maintenance' | 'fuel' | 'alerts' | 'garage';
+type AuthScreen = 'login' | 'passwordRecovery';
 
 export function MainAppNavigator() {
     const insets = useSafeAreaInsets();
+    const theme = useTheme();
+    const styles = React.useMemo(() => createStyles(theme), [theme]);
     const { user } = useApp();
-    const [activeTab, setActiveTab] = useState<'dashboard' | 'maintenance' | 'fuel' | 'alerts' | 'garage'>('dashboard');
+    const [activeTab, setActiveTab] = useState<MainTab>('dashboard');
+    const [authScreen, setAuthScreen] = useState<AuthScreen>('login');
+    const [passwordRecoveryEmail, setPasswordRecoveryEmail] = useState('');
     const [autoOpenModal, setAutoOpenModal] = useState<string | null>(null);
 
     if (!user) {
+        const openPasswordRecovery = (email: string) => {
+            setPasswordRecoveryEmail(email);
+            setAuthScreen('passwordRecovery');
+        };
+
         return (
             <View style={styles.container}>
-                <LoginScreen />
-                <StatusBar style="light" />
+                {authScreen === 'passwordRecovery' ? (
+                    <PasswordRecoveryScreen
+                        initialEmail={passwordRecoveryEmail}
+                        onBack={() => setAuthScreen('login')}
+                    />
+                ) : (
+                    <LoginScreen onForgotPassword={openPasswordRecovery} />
+                )}
+                <StatusBar style="auto" />
             </View>
         );
     }
@@ -92,13 +112,13 @@ export function MainAppNavigator() {
         }
     };
 
-    const renderTabItem = (tab: 'dashboard' | 'maintenance' | 'fuel' | 'alerts' | 'garage', label: string, Icon: any) => (
+    const renderTabItem = (tab: MainTab, label: string, Icon: React.ComponentType<any>) => (
         <TouchableOpacity
             style={styles.tabItem}
             onPress={() => { setActiveTab(tab); handleCloseModal(); }}
             activeOpacity={0.7}
         >
-            <Icon size={20} color={activeTab === tab ? colors.text : colors.textSecondary} />
+            <Icon size={20} color={activeTab === tab ? theme.colors.primary : theme.colors.textSecondary} />
             <Text style={[styles.tabLabel, activeTab === tab && styles.tabLabelActive]}>{label}</Text>
         </TouchableOpacity>
     );
@@ -117,19 +137,19 @@ export function MainAppNavigator() {
                 {renderTabItem('alerts', 'Alertas', Bell)}
                 {renderTabItem('garage', 'Garagem', Car)}
             </View>
-            <StatusBar style="light" />
+            <StatusBar style="auto" />
         </View>
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: AppTheme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: theme.colors.background,
     },
     loadingContainer: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: theme.colors.background,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -139,9 +159,9 @@ const styles = StyleSheet.create({
     tabBar: {
         flexDirection: 'row',
         height: Platform.OS === 'ios' ? 85 : 65,
-        backgroundColor: colors.tabBarBg,
+        backgroundColor: theme.colors.tabBarBg,
         borderTopWidth: 0.5,
-        borderTopColor: colors.border,
+        borderTopColor: theme.colors.border,
         paddingBottom: Platform.OS === 'ios' ? 20 : 8,
         paddingTop: 8,
     },
@@ -151,14 +171,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     tabLabel: {
-        fontSize: 9,
+        fontSize: theme.typography.micro,
         fontWeight: '700',
-        color: colors.textSecondary,
+        color: theme.colors.textSecondary,
         marginTop: 4,
         textTransform: 'uppercase',
-        letterSpacing: 0.8,
+        letterSpacing: 0.2,
     },
     tabLabelActive: {
-        color: colors.text,
+        color: theme.colors.primary,
     },
 });

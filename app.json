@@ -5,12 +5,12 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "cover",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#0F3D5E"
     },
     "ios": {
       "supportsTablet": true
@@ -20,7 +20,7 @@
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#000000"
+        "backgroundColor": "#0F3D5E"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
@@ -47,7 +47,8 @@
           "peripheralUsageDescription": "Este aplicativo precisa de acesso ao Bluetooth para conectar ao adaptador OBD2.",
           "alwaysUsageDescription": "Este aplicativo precisa de acesso ao Bluetooth para conectar ao adaptador OBD2."
         }
-      ]
+      ],
+      "expo-system-ui"
     ]
   }
 }

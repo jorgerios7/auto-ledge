@@ -8,12 +8,23 @@ import {
   updateEmail,
   deleteUser,
   GoogleAuthProvider,
-  signInWithCredential
+  signInWithCredential,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { auth as firebaseAuth, googleWebClientId } from '../services/firebase';
 import { db } from '../services/db';
 import { Timestamp } from 'firebase/firestore';
-import { User, Vehicle, Maintenance, FuelLog, Alert } from '../types';
+import {
+  Alert,
+  AlertFormData,
+  FuelLog,
+  FuelLogFormData,
+  Maintenance,
+  MaintenanceFormData,
+  User,
+  Vehicle,
+  VehicleFormData,
+} from '../types';
 
 let GoogleSignin: any = null;
 try {
@@ -32,6 +43,7 @@ interface AppContextType {
   alerts: Alert[];
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   setSelectedVehicle: (vehicle: Vehicle | null) => void;
   updateUserProfile: (name: string, email: string) => Promise<void>;
@@ -39,14 +51,14 @@ interface AppContextType {
   loginWithGoogle: () => Promise<void>;
 
   // Db actions
-  saveVehicle: (vehicleData: Omit<Vehicle, 'id' | 'userId'> & { id?: string }) => Promise<void>;
+  saveVehicle: (vehicleData: VehicleFormData) => Promise<void>;
   updateVehicleOdometer: (vehicleId: string, odometer: number) => Promise<void>;
   deleteVehicle: (id: string) => Promise<void>;
-  saveMaintenance: (maintData: Omit<Maintenance, 'id' | 'totalCost' | 'vehicleId'> & { id?: string }) => Promise<void>;
+  saveMaintenance: (maintData: MaintenanceFormData) => Promise<void>;
   deleteMaintenance: (id: string) => Promise<void>;
-  saveFuelLog: (fuelData: Omit<FuelLog, 'id' | 'vehicleId'> & { id?: string }) => Promise<void>;
+  saveFuelLog: (fuelData: FuelLogFormData) => Promise<void>;
   deleteFuelLog: (id: string) => Promise<void>;
-  saveAlert: (alertData: Omit<Alert, 'id' | 'status' | 'vehicleId'> & { id?: string; status?: 'pending' | 'completed' }) => Promise<void>;
+  saveAlert: (alertData: AlertFormData) => Promise<void>;
   completeAlert: (id: string) => Promise<void>;
   deleteAlert: (id: string) => Promise<void>;
 
@@ -269,6 +281,24 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      throw new Error('Informe o e-mail cadastrado para recuperar a senha.');
+    }
+
+    try {
+      if (!firebaseAuth) {
+        throw new Error('Firebase Auth não inicializado.');
+      }
+
+      await sendPasswordResetEmail(firebaseAuth, normalizedEmail);
+    } catch (error: any) {
+      throw new Error(error.message || 'Erro ao enviar e-mail de recuperação.');
+    }
+  };
+
   const logout = async () => {
     setLoading(true);
     try {
@@ -395,7 +425,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Vehicles Actions
-  const saveVehicle = async (vehicleData: Omit<Vehicle, 'id' | 'userId'> & { id?: string }) => {
+  const saveVehicle = async (vehicleData: VehicleFormData) => {
     if (!user) return;
     const vehicleId = vehicleData.id || `veh-${Date.now()}`;
 
@@ -497,7 +527,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Maintenance Actions
-  const saveMaintenance = async (maintData: Omit<Maintenance, 'id' | 'totalCost' | 'vehicleId'> & { id?: string }) => {
+  const saveMaintenance = async (maintData: MaintenanceFormData) => {
     if (!user || !selectedVehicle) return;
     const maintId = maintData.id || `maint-${Date.now()}`;
     const totalCost = maintData.partsCost + maintData.laborCost;
@@ -578,7 +608,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Fuel Logs Actions
-  const saveFuelLog = async (fuelData: Omit<FuelLog, 'id' | 'vehicleId'> & { id?: string }) => {
+  const saveFuelLog = async (fuelData: FuelLogFormData) => {
     if (!user || !selectedVehicle) return;
     const fuelId = fuelData.id || `fuel-${Date.now()}`;
 
@@ -630,7 +660,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Alerts Actions
-  const saveAlert = async (alertData: Omit<Alert, 'id' | 'status' | 'vehicleId'> & { id?: string; status?: 'pending' | 'completed' }) => {
+  const saveAlert = async (alertData: AlertFormData) => {
     if (!user || !selectedVehicle) return;
     const alertId = alertData.id || `alert-${Date.now()}`;
 
@@ -692,6 +722,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       alerts,
       login,
       register,
+      resetPassword,
       logout,
       setSelectedVehicle,
       updateUserProfile,

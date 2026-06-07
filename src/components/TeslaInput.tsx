@@ -9,7 +9,7 @@ import {
   TouchableOpacity
 } from 'react-native';
 import { Eye, EyeOff } from 'lucide-react-native';
-import { colors } from '../theme/colors';
+import { AppTheme, useTheme } from '../theme';
 
 interface TeslaInputProps extends TextInputProps {
   label?: string;
@@ -27,6 +27,9 @@ export const TeslaInput = ({
   isDate,
   ...props
 }: TeslaInputProps) => {
+  const theme = useTheme();
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
+  const { colors } = theme;
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -106,27 +109,27 @@ export const TeslaInput = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: AppTheme) => StyleSheet.create({
   container: {
-    marginBottom: 20,
+    marginBottom: theme.spacing.lg,
     width: '100%',
   },
   label: {
-    color: colors.textMuted,
-    fontSize: 12,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.caption,
     fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
+    letterSpacing: 0.4,
     marginBottom: 8,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     height: 48,
-    backgroundColor: colors.surface,
+    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: colors.mediumGray,
-    borderRadius: 4,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
     paddingLeft: 16,
     paddingRight: 8,
   },
@@ -139,22 +142,22 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: '100%',
-    color: colors.text,
-    fontSize: 15,
+    color: theme.colors.text,
+    fontSize: theme.typography.body,
     paddingVertical: 0,
   },
   inputMultiline: {
     textAlignVertical: 'top',
   },
   inputFocused: {
-    borderColor: colors.text,
+    borderColor: theme.colors.primary,
   },
   inputError: {
-    borderColor: colors.error,
+    borderColor: theme.colors.error,
   },
   errorText: {
-    color: colors.error,
-    fontSize: 12,
+    color: theme.colors.error,
+    fontSize: theme.typography.caption,
     marginTop: 6,
   },
   iconContainer: {
